@@ -35,15 +35,18 @@ app.post('/create',async (req,res)=>{
     res.status(201).json(newTodo);
 })
 
-app.get('/todos',(req,res)=>{
+app.get('/todos',async (req,res)=>{
+    const todo =await prisma.todo.findMany();
     res.json(todo);
 })
 
 
 
-app.get('/todos/:id',(req,res)=>{
+app.get('/todos/:id',async (req,res)=>{
     const todoId = parseInt(req.params.id, 10);
-    const foundTodo = todo.find(t => t.id === todoId);
+    const foundTodo = await prisma.todo.findUnique({
+        where: { id: todoId }
+    });
     
     if (!foundTodo) {
         return res.status(404).json({ error: 'Todo not found' });
@@ -52,10 +55,11 @@ app.get('/todos/:id',(req,res)=>{
     res.json(foundTodo);
 });
 
-app.put('/todos/:id',(req,res)=>{
+app.put('/todos/:id',async (req,res)=>{
     const todoId = parseInt(req.params.id, 10);
-    const foundTodo = todo.find(t => t.id === todoId);
-    
+    const foundTodo =await prisma.todo.findUnique({
+        where: { id: todoId }
+});
     if (!foundTodo) {
         return res.status(404).json({ error: 'Todo not found' });
     }
@@ -68,19 +72,28 @@ app.put('/todos/:id',(req,res)=>{
     foundTodo.title = title;
     foundTodo.description = description;
     
+    const updatedTodo = await prisma.todo.update({
+        where: { id: todoId },
+        data: foundTodo 
+    });
+
     res.json(foundTodo);
 })
 
 
-app.delete('/todos/:id',(req,res)=>{
+app.delete('/todos/:id',async (req,res)=>{
     const todoId = parseInt(req.params.id, 10);
-    const todoIndex = todo.findIndex(t => t.id === todoId);
+    const todoIndex = await prisma.todo.findUnique({
+        where: { id: todoId }
+});
     
     if (todoIndex === -1) {
         return res.status(404).json({ error: 'Todo not found' });
     }
     
-    todo.splice(todoIndex, 1);
+    await prisma.todo.delete({
+        where: { id: todoId }
+    });
     
     res.status(204).send();
 })
