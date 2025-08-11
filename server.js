@@ -1,11 +1,17 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
-
+import cors from 'cors';
 
 
 const app = express();
 
 app.use(express.json());
+
+app.use(cors({
+    origin: '*', // Allow all origins, adjust as needed for security    
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'] // Allow specific headers         
+}));
 
 const prisma = new PrismaClient();
 
@@ -98,6 +104,6 @@ app.delete('/todos/:id',async (req,res)=>{
     res.status(204).send();
 })
 
-app.listen(3000);
+app.listen(3001);
 
-console.log('Server is running on port 3000');
+console.log('Server is running on port 3001');
