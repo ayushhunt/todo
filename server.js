@@ -1,9 +1,13 @@
 import express from 'express';
+import { PrismaClient } from '@prisma/client';
+
 
 
 const app = express();
 
 app.use(express.json());
+
+const prisma = new PrismaClient();
 
 app.get('/test',(req,res)=>{
     res.json({ message: 'Test endpoint is working!' });
@@ -11,14 +15,22 @@ app.get('/test',(req,res)=>{
 
 var todo = [];
 
-app.post('/create',(req,res)=>{
+app.post('/create',async (req,res)=>{
     const { title, description } = req.body;
     if (!title || !description) {
         return res.status(400).json({ error: 'Title and description are required' });
     }
     
-    const newTodo = { id: todo.length + 1, title, description };
-    todo.push(newTodo);
+    const newTodo = await prisma.todo.create({
+        data: {
+            title,
+            description
+        }
+    })
+
+    //const newTodo = { id: todo.length + 1, title, description };
+
+    //todo.push(newTodo);
     
     res.status(201).json(newTodo);
 })
